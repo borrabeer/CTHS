@@ -35,3 +35,7 @@ class Room_QueueAdmin(admin.ModelAdmin):
     list_per_page = 10
 admin.site.register(Room_Queue, Room_QueueAdmin)
 
+class LesionAdmin(admin.ModelAdmin):
+    list_per_page = 10
+admin.site.register(Lesion, LesionAdmin)
+
