@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+{% endblock %}
+
+
+{% block style %}
+
+{% endblock %}
+
+{% block content %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10">
+    <form class="needs-validation" novalidate="" method="POST" action="{% url 'create_treatment' patient.p_id %}">
+    {% csrf_token %}
+    <div class="container mt-3 mb-5">
+        {% include "messages.html" %}
+        <div class="row" id='app'>
+            <div class="col-md-6">
+                <h2 class="mb-2">สร้างประวัติการรักษา</h2>
+                    <!-- ROWS OF PATIENT INFORMATION -->
+                    <div class="row">
+                        <div class="card w-100">
+                            <h5 class="card-header">ข้อมูลผู้ป่วย <a href="#" class="btn btn-info btn-sm"
+                                    style="">ข้อมูลเพิ่มเติม</a></h5>
+
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5 class="card-title">{{patient.fname}} {{patient.lname}}
+                                            ({{patient.get_patient_role_display}})</h5>
+                                        <p class="card-text">อายุ {{age.0}} ปี {{age.1}} เดือน {{age.2}} วัน กลุ่มเลือด
+                                            {{patient.blood_type}}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {% if drug.count > 0 %}
+                                        <ul class="card-text">เเพ้ยา : <br>
+                                            {% for d_data in drug %}
+                                            <li>{{d_data.name}}</li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <ul class="card-text">เเพ้ยา : -</ul>
+                                        {% endif %}
+                                        {% if cd.count > 0 %}
+                                        <ul class="card-text">โรคประจำตัว : <br>
+                                            {% for cd_data in cd %}
+                                            <li>{{cd_data.name}}</li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <ul class="card-text">โรคประจำตัว : -</ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="card w-100">
+                            <h5 class="card-header">ข้อมูลเบื้องต้น <a href="#" class="btn btn-info btn-sm"
+                                    style="">ข้อมูลเพิ่มเติม</a></h5>
+
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5 class="card-title">Vital Sign :</h5>
+                                    </div>
+                                </div>
+                                <div class="row my-3">
+                                    <div class="col-md-5">
+                                        ประเภทการเข้ารับการรักษา :
+                                    </div>
+                                    <div class="col-md-8">
+                                        <select v-model="selected" class="custom-select my-1 mr-sm-2"
+                                            name='Symptom_option'>
+                                            <option v-for="option in options" v-bind:value="option.value">
+                                                [[ option.text ]]
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <th scope="row">{{ form.weight.label_tag }}</th>
+                                                    <td> {{ form.weight }}
+                                                        {% if form.weight.errors %}
+                                                        <div class="text-danger"> {{ form.weight.errors }}</div>
+                                                        {% endif %}
+                                                    </td>
+                                                    <th scope="row">{{ form.Height.label_tag }}</th>
+                                                    <td> {{ form.Height }}
+                                                        {% if form.Height.errors %}
+                                                        <div class="text-danger"> {{ form.Height.errors }}</div>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">{{ form.bp.label_tag }}</th>
+                                                    <td> {{ form.bp }}
+                                                        {% if form.bp.errors %}
+                                                        <div class="text-danger"> {{ form.bp.errors }}</div>
+                                                        {% endif %}
+                                                    </td>
+                                                    <th scope="row">{{ form.pr.label_tag }}</th>
+                                                    <td> {{ form.pr }}
+                                                        {% if form.pr.errors %}
+                                                        <div class="text-danger"> {{ form.pr.errors }}</div>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">{{ form.temp.label_tag }}</th>
+                                                    <td> {{ form.temp }}
+                                                        {% if form.temp.errors %}
+                                                        <div class="text-danger"> {{ form.temp.errors }}</div>
+                                                        {% endif %}
+                                                    </td>
+                                                    <th scope="row">{{ form.rr.label_tag }}</th>
+                                                    <td> {{ form.rr }}
+                                                        {% if form.rr.errors %}
+                                                        <div class="text-danger"> {{ form.rr.errors }}</div>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">ดัชนีมวลกาย</th>
+                                                    <td><input type="number" class="form-control"
+                                                            id="formGroupExampleInput2" placeholder="ดัชนีมวลกาย" :value='bmi'
+                                                            disabled>
+                                                    </td>
+                                                    <th scope="row">{{ form.o2_sat.label_tag }}</th>
+                                                    <td> {{ form.o2_sat }}
+                                                        {% if form.o2_sat.errors %}
+                                                        <div class="text-danger"> {{ form.o2_sat.errors }}</div>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        {{ form.patient_condition.label_tag }}
+                                    </div>
+                                    <div class="col-md-8">
+                                        {% for radio in form.patient_condition %}
+                                        <div class="form-check form-check-inline">
+                                            <span class="radio">{{ radio.tag }}</span>
+                                            <label for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                        </div>
+
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-3">
+                                        {{ form.med_cer.label_tag }}
+                                    </div>
+                                    <div class="col-md-8">
+
+                                        <div class="form-check form-check-inline">
+                                            <span class="radio">{{ form.med_cer }}</span>
+                                            <label class='ml-2 mt-1'
+                                                for="{{ form.med_cer.id_for_label }}">ต้องการใบรับรองเเพทย์</label>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+
+
+
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+
+            {% include "Treatment/create_pre_diagnosis.html" %}
+
+            
+            <hr class="mb-4">
+            <button type="submit" class="btn btn-success btn-lg btn-block col-md-11 ml-2 mt-2">ยืนยัน</button>
+        </div>
+
+
+       
+    </form>
+
+    </div>
+
+    </div>
+
+</main>
+{% endblock %}
+{% block footer %}
+<script>
+    var app = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#app',
+        data: {
+            bmi: 0,
+            selected: {% if selected %}'{{selected}}'{%else%}'non_form'{% endif %},
+            options: [
+                { text: 'ทั่วไป', value: 'non_form' },
+                { text: 'ผิวหนัง', value: 'skin' },
+                { text: 'อุบัติเหตุ', value: 'accident' },
+                { text: 'อุบัติเหตุต่อเนื่อง', value: 'con_accident' },
+                { text: 'ดวงตา', value: 'eyes' },
+                { text: 'อาการไข้', value: 'fever' },
+                { text: 'ท้องเสีย', value: 'diarrhea' },
+                { text: 'อาการปวดทุกเเห่ง', value: 'pain' }
+            ]
+        },methods:{
+            bmi_cal: function(){
+                var weight = document.querySelector('#weight').value
+                var height = document.querySelector('#height').value
+                this.bmi = (weight / ((height/100)**2)).toFixed(2)
+            }
+        }
+    })
+</script>
+
+{% endblock %}

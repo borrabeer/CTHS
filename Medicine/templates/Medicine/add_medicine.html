@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block scripts %}
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src='https://kit.fontawesome.com/a076d05399.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+{% endblock %}
+
+{% block styles %}
+<style>
+
+
+tr:hover {
+    background-color: rgb(240, 250, 153) !important;
+  }
+
+  tr {
+    cursor: pointer;
+  }
+
+
+ .my-custom-scrollbar {
+    position: relative;
+    height: 400px;
+    overflow: auto;
+  }
+
+  .table-wrapper-scroll-y {
+    display: block;
+  }
+</style>
+{% endblock %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10">
+  <div class="container">
+    <!-- topic and filter option -->
+    <div class="row mb-3 mt-3">
+      <div class="col-lg-3">
+        <h1>เพิ่มยาใหม่</h1>
+      </div>
+    </div>  
+    <hr>
+    <!-- from -->
+    {% include "messages.html" %}
+    <div class="row" id='app'>
+      <hr>
+      <div class="table-responsive table-wrapper-scroll-y my-custom-scrollbar">
+        <table class="table table-bordered table-striped table-sm">
+          <thead>
+            <tr>
+              <th class="table-dark">Drug ID</th>
+              <th class="table-dark">รหัสมาตรฐาน 24 หลัก</th>
+              <th class="table-dark">ชื่อยา</th>
+              <th class="table-dark">จำนวน</th>
+              <th class="table-dark">รายละเอียด</th>
+            </tr>
+          </thead>
+          <tbody id='data1'>
+            <tr v-for='data in med'>
+              <td>[[data.med_sup_id]]</td>
+              <td>[[data.drug_id]]</td>
+              <td>[[data.name]]</td>
+              <td>[[data.amount]]</td>
+              <td><a class="btn btn-info btn-sm btn-block " :href='"/medicine/addmedicine/"+data.med_sup_id+"/"' >รายละเอียด</a></td>
+            </tr>
+          </tbody>
+        </table>
+        
+      </div>
+    </div>
+    <br>
+    <h3>ยาที่ต้องการเพิ่มใหม่</h3>
+    <hr>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <!-- 1 of 3 -->
+        </div>
+        <hr>
+        <div class="col-8">
+          <!-- from Drug -->
+          <div class="p-2 border ">
+            <form action="{% url 'add_medicine' %}" method="post">
+              {% csrf_token %}
+              <div class="form-group row">
+                <label for="colFormLabelSm" class="col-sm-2 col-form-label col-form-label-sm">ประเภท</label>
+                <div class="col-sm-10">
+                  <select class="form-control form-control-sm" required="" name="types" id="types"
+                    onchange="change(event)">
+                    <option>----</option>
+                    <option value="1">ยา</option>
+                    <option value="2">เวชภัณฑ์</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- from Drug  and supply-->
+              {% include "Medicine/form_addmed.html" %}
+              <!----------->
+            </form>
+          </div>
+        </div>
+        <div class="col">
+          <!-- 3 of 3 -->
+        </div>
+      </div>
+      <hr>
+    </div>
+</main>
+<script>
+  window.onload = function () {
+    initialize();
+  };
+
+  function initialize() {
+    show_drug()
+    
+  }
+
+
+  axios.defaults.xsrfCookieName = 'csrftoken'
+  axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN'
+
+  var app = new Vue({
+      delimiters: ['[[', ']]'],
+      el: '#app',
+      data:{
+        med: [],
+      }, methods:{
+        show_drug: function (med){
+          let self = this;
+          axios.get('/treatment/patient/update/drug/', {
+            //สำเร็จ
+          }).then(function(response){
+              console.log(response.data);
+              self.med = response.data
+            //ไม่สำเร็จ
+          }).catch(function(error){
+              console.log(crror);
+          });
+        }
+      },created(){
+        this.show_drug()
+      }
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function change(event) {
+    var check = event.target.value
+
+    if (check == 1) {
+      document.getElementById('Med').style.display = 'block';
+      document.getElementById('Supply').style.display = 'none';
+    }
+    else if (check == 2) {
+      document.getElementById('Supply').style.display = 'block';
+      document.getElementById('Med').style.display = 'none';
+    }
+    else {
+      document.getElementById('Supply').style.display = 'none';
+      document.getElementById('Med').style.display = 'none';
+    }
+  }
+
+
+  //API
+
+</script>
+{% endblock %}

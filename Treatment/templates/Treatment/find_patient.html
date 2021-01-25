@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+{% endblock %}
+
+{% block style %}
+
+{% endblock %}
+
+{% block content %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10">
+    <div class="container mt-3 mb-5" id='app'>
+        <div class="row" id='app'>
+            <div class="col-md-10">
+                <h2 class="mb-2">ค้นหาผู้ป่วย</h2>
+                <div class="input-group mb-3">
+
+                    <div class="input-group-append">
+                        <select v-model="selected" class="custom-select" name='Symptom_option'>
+                            <option v-for="option in options" v-bind:value="option.value">
+                                [[ option.text ]]
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="input-group-append w-50">
+                        <input type="text" class="form-control" placeholder="คำค้นหา" v-model='keywords'
+                            aria-describedby="basic-addon2">
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-info" v-on:click='find_patient()'>ค้นหา</button>
+                    </div>
+                </div>
+
+                <!-- ROWS OF PATIENT INFORMATION -->
+            </div>
+        </div>
+
+        <div class="row my-3">
+            <div class="col-md-8">
+                จำนวนผลลัพธ์ที่พบ : [[ patients.length ]] ผลลัพธ์
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-11">
+
+                <div v-if="patients.length">
+                    <div class="card w-100 mb-3" v-for='patient in patients'>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <h5 class="card-title">[[patient.fname]] [[patient.lname]] ([[patient.patient_role]])</h5>
+                                    <p class="card-text">เลขประจำตัวประชาชน : [[patient.idcard_number]]</p>
+                                    <p class="card-text"> วันเกิด [[ patient.birth_day]] กลุ่มเลือด [[
+                                        patient.blood_type]]</p>
+                                </div>
+
+                                <div class="col-md-3 mt-2">
+                                    <div class="row">
+                                        <a class="btn btn-success btn-sm"  :href='"/treatment/create/"+patient.p_id+"/" || ""'>สร้างการรักษา</a>
+                                    </div>
+                                    <div class="row mt-3"><a class="btn btn-info btn-sm" :href='"/treatment/patient/update/"+patient.p_id+"/" || ""' >ข้อมูลเพิ่มเติม</a></div>
+                                    
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p v-else>
+                    ไม่พบผลลัพธ์
+                </p>
+
+
+
+
+
+
+
+            </div>
+        </div>
+
+
+        </form>
+
+
+    </div>
+
+    </div>
+
+</main>
+{% endblock %}
+{% block footer %}
+<script>
+    var app = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#app',
+        data: {
+            keywords: "",
+            patients: [], 
+            selected: 'all',
+            options: [
+                { text: 'ทั้งหมด', value: 'all' },
+                { text: 'ชื่อ-นามสกุล', value: 'name' },
+                { text: 'รหัสบัตรประชาชน', value: 'ssid' },
+                { text: 'เบอร์โทรศัพท์', value: 'tel' },
+                { text: 'รหัสประจำตัว', value: 'id_code' },
+            ]
+
+        }, methods: {
+            find_patient: function () {
+                let self = this;
+                axios.get('/treatment/patient/search/', {
+                    params: {
+                        keywords: self.keywords,
+                        selected: self.selected
+                    }
+
+                }).then(function (response) {
+                    console.log(response.data);
+                    self.patients = response.data
+
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            }
+        }, created() {
+            this.find_patient()
+        }
+    })
+</script>
+
+{% endblock %}

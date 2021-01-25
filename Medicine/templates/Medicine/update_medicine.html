@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block content %}
+{% block scripts %}
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src='https://kit.fontawesome.com/a076d05399.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+{% endblock %}
+{% block styles %}
+<style>
+  tr:hover {
+    background-color: rgb(240, 250, 153) !important;
+  }
+
+  tr {
+    cursor: pointer;
+  }
+
+  .my-custom-scrollbar {
+    position: relative;
+    height: 700px;
+    overflow: auto;
+  }
+
+  .table-wrapper-scroll-y {
+    display: block;
+  }
+</style>
+{% endblock %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10">
+  <div class="container">
+    <!-- topic and filter option -->
+    <div class="row mb-3 mt-3">
+      <div class="col-lg-3">
+        <h1>จัดการคลังยา</h1>
+      </div>
+      <div class="col-lg-8 mt-3">
+        <div class="row">
+          <div class="mr-3">
+            ช่วงที่ต้องการค้นหา :
+          </div>
+
+          <div id="reportrange">
+            <div class="col-sm-12">
+              <select class="form-control form-control-ml" required="">
+                <option value="">ค้นตาม</option>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-check form-check-inline ml-3">
+            <input type="text" class="form-control" name="search" placeholder="Search...">
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <!-- status -->
+
+    <!-- table -->
+    {% include "messages.html" %}
+    <div class="row" id='app'>
+
+      <hr>
+      <p class="text-right text-danger">กดเลือกรายการที่ต้องการจัดการยา</p>
+
+      <div class="table-responsive table-wrapper-scroll-y my-custom-scrollbar">
+        <table class="table table-bordered table-striped table-sm">
+          <thead>
+            <tr>
+              <th class="table-dark">Drug ID</th>
+              <th class="table-dark">รหัสมาตรฐาน 24 หลัก</th>
+              <th class="table-dark">ชื่อยา</th>
+              <th class="table-dark">จำนวน</th>
+              <th class="table-dark">รายละเอียด</th>
+            </tr>
+          </thead>
+          <tbody id="data_list">
+            <tr v-for='data in med'>
+              <td>[[data.med_sup_id]]</td>
+              <td>[[data.drug_id]]</td>
+              <td>[[data.name]]</td>
+              <td>[[data.amount]]</td>
+              <td><a class="btn btn-success btn-sm btn-block" :href='"/medicine/updatemedicine/"+data.med_sup_id+"/"' >อัพเดท</a></td>
+            </tr>
+          </tbody>
+        </table>  
+      </div>
+    </div>
+    <hr>
+    </div>
+  </div>
+</main>
+<script>
+  window.onload = function () {
+    initialize();
+  };
+  function initialize() {
+    show_drug()
+  }
+  // //table แสดง เมื่อกด
+  // function showDetail(event) {
+  //   console.log(event.target);
+  //   document.getElementById('showDeatil').style.display = 'flex'
+  // }
+  //----------------------
+
+  axios.defaults.xsrfCookieName = 'csrftoken'
+  axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN'
+  
+
+  var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+      med: [],
+    }, methods: {
+      show_drug: function (med) {
+        let self = this;
+        axios.get('/treatment/patient/update/drug/', {
+        }).then(function (response) {
+          console.log(response.data);
+          self.med = response.data
+        }).catch(function (error) {
+          console.log(crror);
+        });
+      }
+    }, created() {
+      this.show_drug()
+    }
+  })
+
+
+
+
+
+</script>
+
+{% endblock %}

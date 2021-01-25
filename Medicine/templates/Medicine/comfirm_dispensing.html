@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block scripts %}
+{% endblock scripts %}
+
+{% block styles %}
+{% endblock styles %}
+
+{% block content %}
+
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10">
+    <div class="container mt-3 mb-5" id='app'>
+        <div class="row" id='app'>
+            <div class="col-md-6">
+                <h2 class="mb-2">ยืนยันการจ่ายยา</h2>
+                <form class="needs-validation" novalidate="">
+                    <!-- ROWS OF PATIENT INFORMATION -->
+                    <div class="row">
+                        <div class="card w-100">
+                            <h5 class="card-header">รายการรอการจ่ายยา</h5>
+                            <div class="card-body">
+                                <table class="table table-bordered table-sm  table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="table-dark" scope="col">รหัสใบสั่งยา</th>
+                                            <th class="table-dark" scope="col">รหัสการรักษา</th>
+                                            <th class="table-dark" scope="col">ชื่อผู้รับยา</th>
+                                            <th class="table-dark" scope="col">รายละเอียด</th>
+                                            <th class="table-dark" scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for='p_wait in precriptions_wait_list'>
+                                            <th>[[ p_wait.id ]]</th>
+                                            <td>[[ p_wait.treatment_cn.cn ]]</td>
+                                            <td>[[ p_wait.treatment_cn.patient_p_id.fname ]] [[ p_wait.treatment_cn.patient_p_id.lname ]]</td>
+                                            <!-- <td>[[ p_wait.doctor_id.user_id.fname ]] [[ p_wait.doctor_id.user_id.lname ]]</td> -->
+                                            <td>[[ p_wait.detail ]]</td>
+                                            <td><button class="btn-sm btn-info" v-on:click.prevent='select_prescription(p_wait.id)' > > </button></td>
+                                        </tr>
+                                        
+                                    </tbody>
+                                </table>
+                                
+
+                            </div><br>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-5 ml-3 mt-5" v-if='prescription.id'>
+                <div class="row">
+                    <div class="card w-100">
+                        <h5 class="card-header">รายละเอียดใบสั่งยา</h5>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="card-body">
+                                    <p><b>ใบสั่งยาเลขที่ :</b> [[ prescription.id]] </p>
+                                    <p><b>รายละเอียด :</b> [[ prescription.detail ]] </p>
+                                    <p><b>ให้เเก่ :</b>  [[ prescription.treatment_cn.patient_p_id.fname ]] [[ prescription.treatment_cn.patient_p_id.lname ]] </p>
+                            
+                                    <p><b>โดย :</b> นพ./พญ. [[ prescription.doctor_id.user_id.first_name ]] [[ prescription.doctor_id.user_id.last_name ]]</p>
+                                    
+                                    </div>
+                                
+
+                            </div>
+                            <div class="row">
+                                <div class="card-body" style='color:red'>
+                                    <table class="table table-bordered table-striped table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th class="table-dark">ลำดับยา</th>
+                                                <th class="table-dark">ประเภท</th>
+                                                <th class="table-dark">ชื่อยา/เวชภัทฑ์</th>
+                                                <th class="table-dark">จำนวน</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for='(dispense, index) in prescription.dispense '>
+                                                <td >[[ index+1]]</td>
+                                                <td >[[ dispense.type ]]</td>
+                                                <td >[[ dispense.drug.name ]]</td>
+                                                <td >[[ dispense.amount ]]</td>
+
+
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                    <button  type="button" class="btn btn-success btn-sm " style="float: right;" v-on:click='confirm_prescription(prescription.id)'>ยืนยันการจ่ายยา</button><br><br>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+</main>
+
+{% endblock content %}
+
+{% block footer %}
+<script>
+    axios.defaults.xsrfCookieName = 'csrftoken'
+    axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN'
+    var app = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#app',
+        data: {
+            precriptions_wait_list: [],
+            prescription: []
+
+        }, methods: {
+            select_prescription: function (prescription_id) {
+                let self = this;
+                axios.get('/medicine/prescription/'+prescription_id+'/pst_api/', {
+                
+                }).then(function (response) {
+                    console.log(response.data);
+                    self.prescription = response.data
+
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            not_provide_prescription: function() {
+                let self = this;
+                axios.get('/medicine/prescription/pst_api/', {
+                
+                }).then(function (response) {
+                    console.log(response.data);
+                    self.precriptions_wait_list = response.data
+
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            }, confirm_prescription: function(prescription_id){
+                let self = this;
+                console.log(prescription_id)
+                axios.patch('/medicine/prescription/'+prescription_id+'/pst_api/', {
+                    nurse_id: '{{ nurse.user_id.id }}'
+                
+                }).then(function (response) {
+                    self.not_provide_prescription()
+                    self.prescription = []
+                    
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            }
+        }, created() {
+            // this.select_prescription()
+            this.not_provide_prescription()
+        }
+    })
+</script>
+
+{% endblock footer %}
